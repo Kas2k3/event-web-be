@@ -38,6 +38,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @ApiOperation({ summary: 'Get all user' })
   async findAll() {
     const users = await this.usersService.findAll();
     return { message: 'Users retrieved successfully', data: users };
@@ -45,6 +46,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user by id' })
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const user = await this.usersService.findOne(id);
@@ -53,6 +55,7 @@ export class UsersController {
 
   @Patch(':id')
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user by id' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -68,7 +71,10 @@ export class UsersController {
   @ApiOperation({ summary: 'Soft delete a user' })
   @ApiResponse({ status: 200, description: 'The user has been soft deleted.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: User) {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: User,
+  ) {
     await this.usersService.remove(id, user.id);
     return { message: 'User deleted successfully' };
   }

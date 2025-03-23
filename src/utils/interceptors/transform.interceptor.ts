@@ -26,8 +26,9 @@ export interface Response<T> {
 
 @Injectable()
 export class TransformInterceptor<T>
-  implements NestInterceptor<T, Response<T>> {
-  constructor(private readonly reflector: Reflector) { }
+  implements NestInterceptor<T, Response<T>>
+{
+  constructor(private readonly reflector: Reflector) {}
 
   intercept(
     context: ExecutionContext,
@@ -71,7 +72,8 @@ export class TransformInterceptor<T>
         }
 
         // Xử lý message tùy chỉnh
-        const message = data.message || this.getDefaultMessageForStatusCode(statusCode);
+        const message =
+          data.message || this.getDefaultMessageForStatusCode(statusCode);
 
         // Xử lý data
         const responseData = data.data !== undefined ? data.data : data;

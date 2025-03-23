@@ -13,10 +13,11 @@ import { Request } from 'express';
 @Injectable({ scope: Scope.REQUEST })
 @EventSubscriber()
 export class AuditSubscriber
-  implements EntitySubscriberInterface<AuditBaseEntity> {
+  implements EntitySubscriberInterface<AuditBaseEntity>
+{
   private readonly logger = new Logger(AuditSubscriber.name);
 
-  constructor(@Inject(REQUEST) private readonly request: Request) { }
+  constructor(@Inject(REQUEST) private readonly request: Request) {}
 
   listenTo() {
     return AuditBaseEntity;

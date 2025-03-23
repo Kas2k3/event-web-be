@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { UsersService } from '../../users/users.service';
 import { ConfigService } from '@nestjs/config';
+import { IUser } from 'src/users/user.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -18,14 +19,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    const user = await this.usersService.findOne(payload.sub);
+  async validate(payload: IUser) {
+    const user = await this.usersService.findOne(payload.id);
 
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    const { password, ...result } = user;
-    return result;
+    const { id, name, email, role } = payload;
+    return {
+      id,
+      name,
+      email,
+      role,
+    };
   }
 }
