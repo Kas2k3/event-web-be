@@ -1,5 +1,12 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -9,15 +16,30 @@ export class User extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  name: string;
-
   @Column()
   password: string;
 
-  @Column({ default: 'USER' })
+  @Column()
+  name: string;
+
+  @Column({ nullable: true })
+  position?: string;
+
+  @Column({ nullable: true })
+  organization?: string;
+
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ nullable: true })
+  avatar_url?: string;
+
+  @Column({ type: 'text', nullable: true })
+  bio?: string;
+
+  @Column({ default: 'user' })
   role: string;
 
-  // @Column({ default: true })
-  // isActive: boolean;
+  @Column({ default: true })
+  is_active: boolean;
 }

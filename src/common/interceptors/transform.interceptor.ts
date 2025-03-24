@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { RESPONSE_MESSAGE } from '../decorators/response-message.decorator';
 
 export const SKIP_TRANSFORM_INTERCEPTOR = 'skipTransformInterceptor';
 
@@ -26,9 +27,8 @@ export interface Response<T> {
 
 @Injectable()
 export class TransformInterceptor<T>
-  implements NestInterceptor<T, Response<T>>
-{
-  constructor(private readonly reflector: Reflector) {}
+  implements NestInterceptor<T, Response<T>> {
+  constructor(private readonly reflector: Reflector) { }
 
   intercept(
     context: ExecutionContext,
@@ -44,6 +44,8 @@ export class TransformInterceptor<T>
       return next.handle();
     }
 
+    const customMessage = this.reflector.get<string>(RESPONSE_MESSAGE, handler);
+
     const request = context.switchToHttp().getRequest();
 
     return next.handle().pipe(
@@ -51,9 +53,7 @@ export class TransformInterceptor<T>
         const response = context.switchToHttp().getResponse();
         const statusCode = response.statusCode;
 
-        // Xử lý trường hợp data là null hoặc undefined
         if (data === null || data === undefined) {
-          // Xử lý đặc biệt cho DELETE request
           if (request.method === 'DELETE') {
             return {
               data: null,
@@ -71,11 +71,11 @@ export class TransformInterceptor<T>
           };
         }
 
-        // Xử lý message tùy chỉnh
         const message =
-          data.message || this.getDefaultMessageForStatusCode(statusCode);
+          customMessage ||
+          data.message ||
+          this.getDefaultMessageForStatusCode(statusCode);
 
-        // Xử lý data
         const responseData = data.data !== undefined ? data.data : data;
 
         return {

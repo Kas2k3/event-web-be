@@ -11,7 +11,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { PasswordHelper } from 'src/utils/helpers/password.helper';
 import { ErrorMessages } from 'src/utils/constants/error-messages.constant';
-
+import { PaginationDto } from 'src/common/dto/pagination-options.dto';
+import { createPagination } from 'src/utils/helpers/pagination.helper';
+import { Pagination } from 'src/common/interfaces/pagination.interface';
 @Injectable()
 export class UsersService {
   constructor(
@@ -54,8 +56,12 @@ export class UsersService {
     return user;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async findAll(paginationDto: PaginationDto): Promise<Pagination<User>> {
+    return createPagination<User>(this.usersRepository, {
+      ...paginationDto,
+      route: '/users',
+      searchFields: ['name', 'email'],
+    });
   }
 
   async findByEmail(email: string): Promise<User | null> {

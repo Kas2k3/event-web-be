@@ -19,7 +19,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-  ) { }
+  ) {}
 
   private getConfigNumber(key: string, defaultValue?: number): number {
     const value = this.configService.get(key);
