@@ -4,8 +4,9 @@ import {
   IsNotEmpty,
   MinLength,
   IsOptional,
-  IsBoolean,
+  IsEnum,
 } from 'class-validator';
+import { UserRole, UserStatus } from '../entities/user.entity';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -61,7 +62,7 @@ export class CreateUserDto {
     required: false,
   })
   @IsOptional()
-  avatar_url?: string;
+  avatarUrl?: string;
 
   @ApiProperty({
     description: 'The bio of the user',
@@ -73,19 +74,21 @@ export class CreateUserDto {
 
   @ApiProperty({
     description: 'The role of the user',
-    example: 'user',
-    enum: ['user', 'organizer', 'admin'],
-    default: 'user',
+    example: UserRole.USER,
+    enum: UserRole,
+    default: UserRole.USER,
   })
   @IsOptional()
-  role?: string;
+  @IsEnum(UserRole)
+  role?: UserRole;
 
   @ApiProperty({
-    description: 'Is the user active?',
-    example: true,
-    required: false,
+    description: 'The status of the user',
+    example: UserStatus.ACTIVE,
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
   })
   @IsOptional()
-  @IsBoolean()
-  is_active?: boolean;
+  @IsEnum(UserStatus)
+  status?: UserStatus;
 }

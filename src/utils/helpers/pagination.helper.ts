@@ -2,7 +2,6 @@ import { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   Pagination,
   PaginationMeta,
-  PaginationLinks,
   PaginationOptions,
 } from '../../common/interfaces/pagination.interface';
 
@@ -12,7 +11,6 @@ export async function createPagination<T extends ObjectLiteral>(
 ): Promise<Pagination<T>> {
   const page = options.page || 1;
   const limit = options.limit || 10;
-  const route = options.route || '';
   const skip = (page - 1) * limit;
 
   let queryBuilder: SelectQueryBuilder<T>;
@@ -23,6 +21,7 @@ export async function createPagination<T extends ObjectLiteral>(
     queryBuilder = repositoryOrQueryBuilder;
   }
 
+  //search by word
   if (
     options.search &&
     options.searchFields &&
@@ -36,6 +35,7 @@ export async function createPagination<T extends ObjectLiteral>(
     });
   }
 
+  //filter by role and status
   if (options.filter) {
     Object.keys(options.filter).forEach((key) => {
       const value = options.filter![key];
@@ -43,15 +43,6 @@ export async function createPagination<T extends ObjectLiteral>(
         queryBuilder.andWhere(`entity.${key} = :${key}`, { [key]: value });
       }
     });
-  }
-
-  if (options.sortBy) {
-    queryBuilder.orderBy(
-      `entity.${options.sortBy}`,
-      options.sortOrder || 'DESC',
-    );
-  } else {
-    queryBuilder.orderBy('entity.id', 'DESC');
   }
 
   queryBuilder.skip(skip).take(limit);
@@ -68,30 +59,8 @@ export async function createPagination<T extends ObjectLiteral>(
     currentPage: page,
   };
 
-  const links: PaginationLinks = {
-    first: '',
-    previous: '',
-    next: '',
-    last: '',
-  };
-
-  if (route) {
-    const routeWithoutQuery = route.split('?')[0];
-    links.first = `${routeWithoutQuery}?limit=${limit}`;
-    links.last = `${routeWithoutQuery}?page=${totalPages}&limit=${limit}`;
-
-    if (page > 1) {
-      links.previous = `${routeWithoutQuery}?page=${page - 1}&limit=${limit}`;
-    }
-
-    if (page < totalPages) {
-      links.next = `${routeWithoutQuery}?page=${page + 1}&limit=${limit}`;
-    }
-  }
-
   return {
     items,
     meta,
-    links,
   };
 }

@@ -1,12 +1,17 @@
-import { BaseEntity } from 'src/common/entities/base.entity';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+  ORGANIZER = 'ORGANIZER',
+}
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -32,14 +37,22 @@ export class User extends BaseEntity {
   phone?: string;
 
   @Column({ nullable: true })
-  avatar_url?: string;
+  avatarUrl?: string;
 
   @Column({ type: 'text', nullable: true })
   bio?: string;
 
-  @Column({ default: 'user' })
-  role: string;
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
-  @Column({ default: true })
-  is_active: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.INACTIVE,
+  })
+  status: UserStatus;
 }

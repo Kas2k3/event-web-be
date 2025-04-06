@@ -1,39 +1,37 @@
 import {
   EntitySubscriberInterface,
   EventSubscriber,
-  InsertEvent,
-  UpdateEvent,
+  // InsertEvent,
+  // UpdateEvent,
   SoftRemoveEvent,
 } from 'typeorm';
-import { AuditBaseEntity } from '../entities/audit-base.entity';
+import { BaseEntity } from '../entities/base.entity';
 import { REQUEST } from '@nestjs/core';
 import { Inject, Injectable, Scope, Logger } from '@nestjs/common';
 import { Request } from 'express';
 
 @Injectable({ scope: Scope.REQUEST })
 @EventSubscriber()
-export class AuditSubscriber
-  implements EntitySubscriberInterface<AuditBaseEntity>
-{
+export class AuditSubscriber implements EntitySubscriberInterface<BaseEntity> {
   private readonly logger = new Logger(AuditSubscriber.name);
 
   constructor(@Inject(REQUEST) private readonly request: Request) {}
 
   listenTo() {
-    return AuditBaseEntity;
+    return BaseEntity;
   }
 
-  beforeInsert(event: InsertEvent<AuditBaseEntity>) {
-    this.setCreatedBy(event.entity);
-  }
+  // beforeInsert(event: InsertEvent<BaseEntity>) {
+  //   this.setCreatedBy(event.entity);
+  // }
 
-  beforeUpdate(event: UpdateEvent<AuditBaseEntity>) {
-    if (event.entity) {
-      this.setUpdatedBy(event.entity as AuditBaseEntity);
-    }
-  }
+  // beforeUpdate(event: UpdateEvent<BaseEntity>) {
+  //   if (event.entity) {
+  //     this.setUpdatedBy(event.entity as BaseEntity);
+  //   }
+  // }
 
-  beforeSoftRemove(event: SoftRemoveEvent<AuditBaseEntity>) {
+  beforeSoftRemove(event: SoftRemoveEvent<BaseEntity>) {
     if (event.entity) {
       this.setDeletedBy(event.entity);
     }
@@ -42,7 +40,6 @@ export class AuditSubscriber
   private getUserId(): number | undefined {
     try {
       const user = this.request.user;
-      // Kiểm tra an toàn trước khi truy cập thuộc tính id
       if (user && typeof user === 'object' && 'id' in user) {
         return Number(user.id);
       }
@@ -53,21 +50,21 @@ export class AuditSubscriber
     }
   }
 
-  private setCreatedBy(entity: AuditBaseEntity): void {
-    const userId = this.getUserId();
-    if (userId !== undefined) {
-      entity.createdBy = userId;
-    }
-  }
+  // private setCreatedBy(entity: BaseEntity): void {
+  //   const userId = this.getUserId();
+  //   if (userId !== undefined) {
+  //     entity.createdBy = userId;
+  //   }
+  // }
 
-  private setUpdatedBy(entity: AuditBaseEntity): void {
-    const userId = this.getUserId();
-    if (userId !== undefined) {
-      entity.updatedBy = userId;
-    }
-  }
+  // private setUpdatedBy(entity: BaseEntity): void {
+  //   const userId = this.getUserId();
+  //   if (userId !== undefined) {
+  //     entity.updatedBy = userId;
+  //   }
+  // }
 
-  private setDeletedBy(entity: AuditBaseEntity): void {
+  private setDeletedBy(entity: BaseEntity): void {
     const userId = this.getUserId();
     if (userId !== undefined) {
       entity.deletedBy = userId;

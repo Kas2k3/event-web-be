@@ -1,3 +1,22 @@
+import { UserStatus } from 'src/users/entities/user.entity';
+import { SortOrder } from '../dto/pagination-options.dto';
+
+export interface UserFilter {
+  roleNames?: string[];
+  statuses?: UserStatus[];
+  [key: string]: any;
+}
+
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  searchFields?: string[];
+  filter?: UserFilter;
+  sortBy?: string;
+  sortOrder?: SortOrder;
+}
+
 export interface PaginationMeta {
   totalItems: number;
   itemCount: number;
@@ -6,26 +25,7 @@ export interface PaginationMeta {
   currentPage: number;
 }
 
-export interface PaginationLinks {
-  first: string;
-  previous: string;
-  next: string;
-  last: string;
-}
-
 export interface Pagination<T> {
   items: T[];
   meta: PaginationMeta;
-  links: PaginationLinks;
-}
-
-export interface PaginationOptions {
-  page?: number;
-  limit?: number;
-  route?: string;
-  search?: string;
-  searchFields?: string[];
-  sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
-  filter?: Record<string, any>;
 }

@@ -12,22 +12,14 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import {
-  PaginationDto,
-  SortOrder,
-} from 'src/common/dto/pagination-options.dto';
+import { PaginationDto } from 'src/common/dto/pagination-options.dto';
 import { Pagination } from 'src/common/interfaces/pagination.interface';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
@@ -46,19 +38,13 @@ export class UsersController {
   @ResponseMessage('User created successfully')
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
-    return user; // Không cần trả về { message, data } nữa
+    return user;
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users with pagination (Admin only)' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: SortOrder })
-  @ApiQuery({ name: 'filter', required: false, type: 'object' })
   @ResponseMessage('Users retrieved successfully')
   async findAll(
     @Query() paginationDto: PaginationDto,

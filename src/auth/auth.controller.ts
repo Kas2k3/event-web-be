@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -20,14 +21,17 @@ import {
   ApiCookieAuth,
 } from '@nestjs/swagger';
 import { Public } from './decorators/public.decorator';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('login')
+  @UseGuards(ThrottlerGuard)
+  // @Throttle(5, 60000);
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({

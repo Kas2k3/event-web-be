@@ -19,7 +19,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-  ) {}
+  ) { }
 
   private getConfigNumber(key: string, defaultValue?: number): number {
     const value = this.configService.get(key);
@@ -30,6 +30,44 @@ export class AuthService {
       throw new Error(`Config key "${key}" is required but not provided`);
     }
     return parseInt(value, 10);
+  }
+
+  private parseTimeToMs(timeString: string): number {
+    const timeRegex = /^(\d+)(d|h|m|s)$/;
+    const match = RegExp(timeRegex).exec(timeString);
+
+    if (match) {
+      const value = parseInt(match[1], 10);
+      const unit = match[2];
+
+      switch (unit) {
+        case 'd':
+          return value * 24 * 60 * 60 * 1000;
+        case 'h':
+          return value * 60 * 60 * 1000;
+        case 'm':
+          return value * 60 * 1000;
+        case 's':
+          return value * 1000;
+        default:
+          return value;
+      }
+    }
+
+    return parseInt(timeString, 10) * 1000;
+  }
+
+  private getRefreshExpirationMs(): number {
+    const refreshExpiresIn =
+      this.configService.get('JWT_REFRESH_EXPIRES_IN') || '7d';
+    if (
+      typeof refreshExpiresIn === 'string' &&
+      isNaN(Number(refreshExpiresIn))
+    ) {
+      return this.parseTimeToMs(refreshExpiresIn);
+    }
+
+    return parseInt(refreshExpiresIn as string, 10) * 1000;
   }
 
   async validateUser(email: string, password: string): Promise<IUser | null> {
@@ -59,21 +97,20 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(user);
-    await this.storeRefreshToken(user.id, tokens.refresh_token);
+    await this.storeRefreshToken(user.id, tokens.refreshToken);
 
-    const maxAge =
-      this.getConfigNumber('JWT_REFRESH_EXPIRES_IN', 604800) * 1000;
+    const maxAge = this.getRefreshExpirationMs();
 
-    response.cookie('refresh_token', tokens.refresh_token, {
+    response.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'strict',
       maxAge: maxAge,
-      path: '/api/auth/refresh',
+      path: '/api',
     });
 
     return {
-      access_token: tokens.access_token,
+      accessToken: tokens.accessToken,
       id: user.id,
       name: user.name,
       email: user.email,
@@ -82,14 +119,14 @@ export class AuthService {
   }
 
   async refreshTokens(request: Request, response: Response) {
-    const refresh_token = request.cookies['refresh_token'];
+    const refreshToken = request.cookies['refreshToken'];
 
-    if (!refresh_token) {
+    if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found');
     }
 
     try {
-      const payload = this.jwtService.verify(refresh_token, {
+      const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
@@ -126,25 +163,25 @@ export class AuthService {
       };
 
       const tokens = await this.getTokens(userInfo);
-      await this.storeRefreshToken(userInfo.id, tokens.refresh_token);
+      await this.storeRefreshToken(userInfo.id, tokens.refreshToken);
 
       const maxAge =
         this.getConfigNumber('JWT_REFRESH_EXPIRES_IN', 604800) * 1000;
 
-      response.cookie('refresh_token', tokens.refresh_token, {
+      response.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: this.configService.get('NODE_ENV') === 'production',
         sameSite: 'strict',
         maxAge: maxAge,
-        path: '/api/auth/refresh',
+        path: '/api',
       });
 
       return {
-        access_token: tokens.access_token,
+        accessToken: tokens.accessToken,
       };
     } catch (error) {
-      response.clearCookie('refresh_token', {
-        path: '/api/auth/refresh',
+      response.clearCookie('refreshToken', {
+        path: '/api',
       });
 
       throw new UnauthorizedException('Invalid refresh token');
@@ -154,8 +191,12 @@ export class AuthService {
   async logout(userId: number, response: Response) {
     await this.refreshTokenRepository.softDelete({ userId, isActive: true });
 
-    response.clearCookie('refresh_token', {
-      path: '/api/auth/refresh',
+    response.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite:
+        this.configService.get('NODE_ENV') === 'production' ? 'strict' : 'lax',
+      path: '/api',
     });
 
     return { message: 'Logout successful' };
@@ -173,7 +214,7 @@ export class AuthService {
       role: user.role,
     };
 
-    const [access_token, refresh_token] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get('JWT_SECRET'),
         expiresIn: this.configService.get('JWT_EXPIRES_IN'),
@@ -186,8 +227,8 @@ export class AuthService {
     ]);
 
     return {
-      access_token,
-      refresh_token,
+      accessToken,
+      refreshToken,
     };
   }
 
