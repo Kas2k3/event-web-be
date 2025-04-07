@@ -75,15 +75,6 @@ export class PaginationDto {
   search?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter options for roles and statuses.',
-    type: UserFilterDto,
-  })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UserFilterDto)
-  filter?: UserFilterDto;
-
-  @ApiPropertyOptional({
     description:
       'Sort order of the results: ascending (ASC) or descending (DESC).',
     enum: SortOrder,
