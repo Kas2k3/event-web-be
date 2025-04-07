@@ -81,6 +81,7 @@ export class AuthService {
         name: userData.name,
         email: userData.email,
         role: userData.role,
+        status: userData.status,
       };
 
       return userInfo;
@@ -160,6 +161,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
+        status: user.status,
       };
 
       const tokens = await this.getTokens(userInfo);

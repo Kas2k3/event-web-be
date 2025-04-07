@@ -1,41 +1,6 @@
 version: '3.8'
 
 services:
-  # NestJS Application
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nestjs_event_sys
-    ports:
-      - "${PORT}:${PORT}"
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_DATABASE=${DB_DATABASE}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN}
-      - EMAIL_AUTH_USER=${EMAIL_AUTH_USER}
-      - EMAIL_AUTH_PASS=${EMAIL_AUTH_PASS}
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_PREVIEW=${EMAIL_PREVIEW}
-      - EMAIL_PORT=${EMAIL_PORT}
-      - PORT=${PORT}
-    volumes:
-      - .:/app
-      - /app/node_modules
-    depends_on:
-      - postgres
-    networks:
-      - event_sys_network
-    restart: unless-stopped
-    command: npm run start:dev
-
   # PostgreSQL
   postgres:
     image: postgres:17
